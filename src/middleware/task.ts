@@ -5,7 +5,7 @@ import { check, validationResult } from "express-validator";
 declare global {
     namespace Express {
         interface Request {
-            task:  ITask
+            task: ITask
         }
     }
 }
