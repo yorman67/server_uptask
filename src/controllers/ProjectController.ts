@@ -8,7 +8,9 @@ export class ProjectController {
         
         try {
             const project = await Project.create(req.body)
-            res.json({project : project})
+            res.json({
+                message : "Project created",
+                project : project})
         } catch (error) {
             console.log(error)
         }

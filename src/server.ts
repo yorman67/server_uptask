@@ -1,5 +1,7 @@
 import  express  from "express";
 import dotenv from "dotenv";
+import corse from "cors"
+import {corsConfig} from "./config/cors"
 import { connectDB } from "./config/db";
 import  projectRoutes from './routes/projectRoutes'
 
@@ -11,6 +13,10 @@ connectDB()
 
 // initializing express
 const app = express();
+
+//cors
+app.use(corse(corsConfig))
+
 
 // read body
 app.use(express.json())
