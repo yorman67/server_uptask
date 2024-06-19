@@ -28,7 +28,8 @@ export const validateId = async (req: Request, res: Response, next: NextFunction
     await check("id", "ID no válido").isMongoId().run(req);
     let errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ error: "ID no válido" });
+        const error = new Error('ID no válido')
+        return res.status(404).json({ error: error.message })
     }
     next();
 }

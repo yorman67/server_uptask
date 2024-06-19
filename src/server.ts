@@ -4,6 +4,7 @@ import corse from "cors"
 import {corsConfig} from "./config/cors"
 import { connectDB } from "./config/db";
 import  projectRoutes from './routes/projectRoutes'
+import morgan from "morgan";
 
 // getting .env variables
 dotenv.config()
@@ -17,7 +18,8 @@ const app = express();
 //cors
 app.use(corse(corsConfig))
 
-
+//Logger
+app.use(morgan('dev'))
 // read body
 app.use(express.json())
 
