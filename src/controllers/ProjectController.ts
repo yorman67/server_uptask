@@ -12,7 +12,10 @@ export class ProjectController {
                 message : "Project created",
                 project : project})
         } catch (error) {
-            console.log(error)
+            res.json({
+                message : "Error creating project",
+                error : error
+            })
         }
 
     }

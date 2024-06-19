@@ -27,7 +27,8 @@ export async function taskExists(req: Request, res: Response, next: NextFunction
         const { taskId } = req.params
         const task = await Task.findById(taskId)
         if (!task) {
-            return res.status(404).json({ error: 'Task not found' })
+            const error = new Error('Task not found')
+            return res.status(404).json({ error: error.message })
         }
         req.task = task
         next()
@@ -59,7 +60,8 @@ export const validateStatus = async (req: Request, res: Response, next: NextFunc
 
 export const taskBelongsToProject = async (req: Request, res: Response, next: NextFunction) => {
     if (req.task.project.toString() !== req.project.id) {
-        return res.status(404).json({ error: 'this task does not belong to this project' })
+        const error = new Error('this task does not belong to this project')
+        return res.status(404).json({ error: error.message })
     }
     next();
 }
