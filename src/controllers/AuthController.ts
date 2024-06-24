@@ -10,11 +10,13 @@ export class AuthController {
     static createAccount = async function (req: Request, res: Response) {
         try {
 
+            
             const { password, email } = req.body
-
             // prevent duplicate emails
             const userExists = await Auth.findOne({ email })
-            if (userExists.confirmed) {
+            
+
+            if (userExists) {
                 const error = new Error('user already exists')
                 return res.status(409).json({ error: error.message })
             }
