@@ -3,11 +3,14 @@ import { ProjectController } from "../controllers/ProjectController";
 import { TaskController } from "../controllers/TaskController";
 import { ProjectValidation, projectExists, validateId, validateProjectId } from "../middleware/projects";
 import { TaskValidation, taskBelongsToProject, taskExists, validateStatus, validateTaskId } from "../middleware/task";
+import { authenticate } from "../middleware/auth";
 
 const router = esxpress.Router();
 
 /** routes for projects */
 router.param("id", validateId)
+router.use(authenticate)
+
 router.post("/",
     ProjectValidation,
     ProjectController.createProject,
@@ -16,7 +19,6 @@ router.get("/",
     ProjectController.getAllProjects
 )
 router.get("/:id",
-
     ProjectController.getProjectById
 )
 router.put("/:id",

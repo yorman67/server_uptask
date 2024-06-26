@@ -4,78 +4,112 @@ import Project from "../models/Projects";
 export class ProjectController {
 
 
-    static createProject = async (req : Request, res : Response) => {
-        
+    static createProject = async (req: Request, res: Response) => {
+
         try {
-            const project = await Project.create(req.body)
+            const project = req.body
+            //assign manager
+            project.manager = req.auth.id
+
+            //Create
+            await Project.create(project)
+
             res.json({
-                message : "Project created",
-                project : project})
+                message: "Project created",
+                project: project
+            })
         } catch (error) {
             res.json({
-                message : "Error creating project",
-                error : error
+                message: "Error creating project",
+                error: error
             })
         }
 
     }
 
-    static getAllProjects = async (req : Request, res : Response) => {
-        
+    static getAllProjects = async (req: Request, res: Response) => {
+
         try {
-            const projects = await Project.find()
-            res.json({projects : projects})
+            const projects = await Project.find({
+                $or: [
+                    { manager: {$in: req.auth.id} }
+                ]
+            })
+            res.json({ projects: projects })
         } catch (error) {
             console.log(error)
         }
     }
 
-    static getProjectById = async (req : Request, res : Response) => {
-        
+    static getProjectById = async (req: Request, res: Response) => {
+
         try {
             const project = await Project.findById(req.params.id).populate('tasks')
-            res.json({project : project})
-            if(!project){
-                res.status(404).json({message : "project not found"})
+          
+            if (!project) {
+                res.status(404).json({ message: "project not found" })
             }
+
+            if (project.manager.toString() !== req.auth.id.toString()) {
+                res.status(401).json({ message: "Unauthorized" })
+            }
+
+            res.json({ project: project })
         } catch (error) {
             console.log(error)
         }
     }
 
-    static updateProject = async (req : Request, res : Response) => {
+    static updateProject = async (req: Request, res: Response) => {
         const { id } = req.params
-        
+
         try {
-            const project = await Project.findByIdAndUpdate(id, req.body)
+            const project = await Project.findById(id)
             if (!project) {
                 res.status(404).json({ message: "Project not found" });
                 return;
             }
-            
+            if (project.manager.toString() !== req.auth.id.toString()) {
+                res.status(401).json({ message: "Unauthorized, you are not the project manager" })
+            }
+            project.clientName = req.body.clientName
+            project.projectName = req.body.projectName
+            project.description = req.body.description
+
+            await project.save()
+
             res.json({
-                message : "Project updated",
-                data : project
+                message: "Project updated",
+                data: project
             })
         } catch (error) {
             console.log(error)
         }
     }
 
-    static deleteProject = async (req : Request, res : Response) => {
+    static deleteProject = async (req: Request, res: Response) => {
         const { id } = req.params
-        
+
         try {
-            const project = await Project.findByIdAndDelete(id)
+
+            const project = await Project.findById(id)
             if (!project) {
                 res.status(404).json({ message: "Project not found" });
                 return;
             }
-            
-            res.json({project : {
-                message : "Project deleted",
-                data: project
-            } })
+
+            if (project.manager.toString() !== req.auth.id.toString()) {
+                res.status(401).json({ message: "Unauthorized, you are not the project manager" })
+            }
+
+            await project.deleteOne()
+
+            res.json({  
+                project: {
+                    message: "Project deleted",
+                    data: project
+                }
+            })
         } catch (error) {
             console.log(error)
         }

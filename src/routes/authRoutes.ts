@@ -1,10 +1,9 @@
 import esxpress, { Router } from "express";
 import { AuthController } from "../controllers/AuthController";
-import { accountValidation, loginValidation, validateToken } from "../middleware/auth";
+import { accountValidation, emailValidation, loginValidation, authenticate, validateRecoverPassword, validateToken } from "../middleware/auth";
 
 
 const router = esxpress.Router();
-
 router.post("/create-account",
     accountValidation,
     AuthController.createAccount
@@ -21,7 +20,24 @@ router.post("/resend-token",
 
 router.post("/login",
     loginValidation,
+    authenticate,
     AuthController.login
+)
+
+router.post("/recover-password",
+    emailValidation,
+    AuthController.recoverPassword
+)
+
+router.post("/valide-token-recover-password",
+    validateToken,
+    AuthController.valideTokenRecoverPassword 
+) 
+
+
+router.post("/update-password/:token",
+    validateRecoverPassword,
+    AuthController.changePassword
 )
 
 export default router

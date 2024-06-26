@@ -4,6 +4,7 @@ import { checkPassword, hashPassword } from "../utils/auth";
 import Token from "../models/Token";
 import { generateToken } from "../utils/token";
 import { AuthEmail } from "../emails/AuthEmail";
+import { generateJWT } from "../utils/jwt";
 
 export class AuthController {
 
@@ -127,8 +128,19 @@ export class AuthController {
             }
 
             if (!user.confirmed) {
-                const error = new Error('user not confirmed')
-                return res.status(404).json({ error: error.message })
+                const token = new Token()
+                token.token = generateToken()
+                token.user = user.id
+
+                await token.save()
+
+                await AuthEmail.sendAccountConfirmation({
+                    email: user.email,
+                    token: token.token,
+                    name: user.name
+                })
+
+                return res.json({ message: 'we have sent a token to your email ', token })
             }
 
             const validPassword = await checkPassword(password, user.password) 
@@ -138,14 +150,89 @@ export class AuthController {
                 return res.status(401).json({ error: error.message })
             }
 
-            const token = generateToken()
-            user.token = token
-            await user.save()
+            const token = generateJWT({ id: user.id })
+    
             res.json({
-                message: 'login successful',
+                message: 'user logged in',
+                token,
+            })
+
+        } catch (error) {
+            res.status(500).json({ error: 'There was an error' })
+        }
+    }
+
+    static recoverPassword = async function (req: Request, res: Response) {
+        try {
+            const { email } = req.body
+            const user = await Auth.findOne({ email })
+
+            if (!user ) {
+                const error = new Error('user not found')
+                return res.status(404).json({ error: error.message })
+            }
+
+            const token = new Token()
+            token.token = generateToken()
+            token.user = user.id
+            await token.save()
+
+            await AuthEmail.sendPasswordRecovery({
+                email: user.email,
+                token: token.token,
+                name: user.name
+            })
+            
+            res.json({
+                message: "check your email to recover your password",
                 user: user
             })
 
+        } catch (error) {
+            res.status(500).json({ error: 'There was an error' })
+        }
+    }
+
+    static valideTokenRecoverPassword = async function (req: Request, res: Response) {
+        try {
+            const { token } = req.body
+            const tokenExists = await Token.findOne({ token })
+            if (!tokenExists) {
+                const error = new Error('Invalid token')
+                return res.status(401).json({ error: error.message })
+            }
+
+            res.json({
+                message: 'token valid'
+            })
+        } catch (error) {
+            res.status(500).json({ error: 'There was an error' })
+        }
+    }
+
+    static changePassword = async function (req: Request, res: Response) {
+        try {
+            const { token } = req.params
+            const { password } = req.body
+
+            const tokenExists = await Token.findOne({ token })
+            
+            if (!tokenExists) {
+                const error = new Error('Invalid token')
+                return res.status(401).json({ error: error.message })
+            }
+
+            const user = await Auth.findById(tokenExists.user)
+            if (!user) {
+                const error = new Error('user not found')
+                return res.status(404).json({ error: error.message })
+            }
+            user.password = await hashPassword(password)
+            await Promise.allSettled([user.save(), tokenExists.deleteOne()])
+
+            res.json({
+                message: 'password changed'
+            })  
         } catch (error) {
             res.status(500).json({ error: 'There was an error' })
         }
