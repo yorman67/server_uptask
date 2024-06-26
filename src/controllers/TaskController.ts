@@ -73,7 +73,6 @@ export class TaskController {
     static updateTaskStatus = async (req: Request, res: Response) => {
         try {
             const { status } = req.body
-            console.log(req.task)
             req.task.status = status
             await req.task.save()
 

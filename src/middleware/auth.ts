@@ -118,6 +118,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
             const user = await Auth.findById(decoded.payload.id).select('_id name email')
             if(user) {
                req.auth = user
+               next()
             }else{
                 const error = new Error('invalid token')
                 return res.status(500).json({
@@ -131,6 +132,4 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
             error: "invalid token"
         })
     }
-
-    next();
 }

@@ -238,4 +238,15 @@ export class AuthController {
         }
     }
 
+    static user = async function (req: Request, res: Response) {
+        try {
+            
+            res.json({
+                user: req.auth
+            })
+        } catch (error) {
+            res.status(500).json({ error: 'There was an error' })
+        }
+    }
+
 }       

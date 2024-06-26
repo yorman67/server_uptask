@@ -20,7 +20,6 @@ router.post("/resend-token",
 
 router.post("/login",
     loginValidation,
-    authenticate,
     AuthController.login
 )
 
@@ -38,6 +37,11 @@ router.post("/valide-token-recover-password",
 router.post("/update-password/:token",
     validateRecoverPassword,
     AuthController.changePassword
+)
+
+router.get("/get-user",
+    authenticate,
+    AuthController.user
 )
 
 export default router
