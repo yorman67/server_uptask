@@ -1,4 +1,4 @@
-import mongoose, {Schema, Document, Types} from 'mongoose'
+import mongoose, { Schema, Document, Types } from 'mongoose'
 
 
 const tasksStatus = {
@@ -11,19 +11,35 @@ const tasksStatus = {
 
 export type TaskStatus = typeof tasksStatus[keyof typeof tasksStatus]
 
-export interface ITask extends Document {
-   name: string
-   description: string 
-   project : Types.ObjectId
-   status : TaskStatus
- } 
+export interface ITask extends Document { //typeScript
+    name: string
+    description: string
+    project: Types.ObjectId
+    status: TaskStatus
+    completedBy: {
+        user: Types.ObjectId
+        status: TaskStatus
+    }[]
+}
 
- export const TaskSchema = new Schema({
-    name: {type: String, required: true, trim: true},
-    description: {type: String, required: true, trim: true},
-    project: {type: Types.ObjectId, ref: "Project", required: true},
-    status: {type: String, enum: Object.values(tasksStatus), default: tasksStatus.PENDING}
-}, {timestamps: true})
+export const TaskSchema = new Schema({
+    name: { type: String, required: true, trim: true },
+    description: { type: String, required: true, trim: true },
+    project: { type: Types.ObjectId, ref: "Project", required: true },
+    status: { type: String, enum: Object.values(tasksStatus), default: tasksStatus.PENDING },
+    completedBy: [{
+        user: {
+            type: Types.ObjectId,
+            ref: "Auth",
+            default: null
+        },
+        status:{
+            type: String, 
+            enum: Object.values(tasksStatus), 
+            default: tasksStatus.PENDING
+        }
+    }]
+}, { timestamps: true })
 
- const Task = mongoose.model<ITask>("Task", TaskSchema)
- export default Task
+const Task = mongoose.model<ITask>("Task", TaskSchema)
+export default Task

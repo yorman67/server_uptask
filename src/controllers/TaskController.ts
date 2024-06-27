@@ -32,7 +32,11 @@ export class TaskController {
 
     static gettaskById = async (req: Request, res: Response) => {
         try {
-            res.json({ tasks: req.task })
+            const task = await Task.findById(req.task.id).populate({
+                path: 'completedBy.user',
+                select: 'name email id'
+            })
+            res.json({ tasks: task })
         } catch (error) {
             res.status(500).json({ error: 'There was an error' })
         }
@@ -74,6 +78,13 @@ export class TaskController {
         try {
             const { status } = req.body
             req.task.status = status
+
+            const data = {
+                user: req.auth.id,
+                status
+            }
+
+            req.task.completedBy.push(data)
             await req.task.save()
 
             res.json({
