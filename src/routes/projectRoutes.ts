@@ -1,9 +1,10 @@
 import esxpress, { Router } from "express";
 import { ProjectController } from "../controllers/ProjectController";
 import { TaskController } from "../controllers/TaskController";
-import { ProjectValidation, projectExists, validateId, validateProjectId } from "../middleware/projects";
-import { TaskValidation, taskBelongsToProject, taskExists, validateStatus, validateTaskId } from "../middleware/task";
+import { ProjectValidation, projectExists, userId, validateEmail, validateId, validateProjectId } from "../middleware/projects";
+import { TaskValidation, hasAuthorization, taskBelongsToProject, taskExists, validateStatus, validateTaskId } from "../middleware/task";
 import { authenticate } from "../middleware/auth";
+import { TeamController } from "../controllers/TeamController";
 
 const router = esxpress.Router();
 
@@ -39,6 +40,7 @@ router.param("taskId", taskBelongsToProject)
 
 router.post("/:projectId/tasks",
     TaskValidation,
+    hasAuthorization,
     TaskController.createTask
 )
 router.get("/:projectId/tasks",
@@ -49,14 +51,36 @@ router.get("/:projectId/tasks/:taskId",
 )
 router.put("/:projectId/tasks/:taskId",
     TaskValidation,
+    hasAuthorization,
     TaskController.updateTask
 )
 router.delete("/:projectId/tasks/:taskId",
+    hasAuthorization,
     TaskController.deleteTask
 )
 router.post("/:projectId/tasks/:taskId/status",
     validateStatus,
     TaskController.updateTaskStatus
+)
+
+/** routes for teams */
+router.post("/:projectId/team/find",
+    validateEmail,
+    TeamController.findMemberbyEmail
+)
+
+router.post("/:projectId/team",
+    validateId,
+    TeamController.addMemberbyId
+)
+
+router.get("/:projectId/team",
+    TeamController.getTeamProject
+)
+
+router.delete("/:projectId/team/:userId",
+    userId,
+    TeamController.removeMember
 )
 
 export default router 

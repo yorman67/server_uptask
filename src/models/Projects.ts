@@ -10,6 +10,7 @@ export interface IProject extends Document  { //typescript
     description: string
     tasks : PopulatedDoc<ITask & Document>[]
     manager : PopulatedDoc<IAuth & Document>
+    team : PopulatedDoc<IAuth & Document>[]
 };
 
 const projectSchema = new Schema({ //mongoose
@@ -17,7 +18,8 @@ const projectSchema = new Schema({ //mongoose
     clientName: {type: String, required: true , trim: true},
     description: {type: String, required: true , trim: true},
     tasks : [{type: Types.ObjectId, ref: "Task"}],
-    manager : {type: Types.ObjectId, ref: "Auth"}
+    manager : {type: Types.ObjectId, ref: "Auth"},
+    team : [{type: Types.ObjectId, ref: "Auth"}]
 }, {timestamps: true});
 
 const Project = mongoose.model<IProject>("Project", projectSchema);

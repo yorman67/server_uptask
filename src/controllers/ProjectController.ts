@@ -32,7 +32,8 @@ export class ProjectController {
         try {
             const projects = await Project.find({
                 $or: [
-                    { manager: {$in: req.auth.id} }
+                    { manager: {$in: req.auth.id} },
+                    { team: {$in: req.auth.id} }
                 ]
             })
             res.json({ projects: projects })
@@ -50,7 +51,7 @@ export class ProjectController {
                 res.status(404).json({ message: "project not found" })
             }
 
-            if (project.manager.toString() !== req.auth.id.toString()) {
+            if (project.manager.toString() !== req.auth.id.toString() && !project.team.includes(req.auth.id)) {
                 res.status(401).json({ message: "Unauthorized" })
             }
 
@@ -114,5 +115,5 @@ export class ProjectController {
             console.log(error)
         }
     }
-
+    
 }
