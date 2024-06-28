@@ -1,10 +1,11 @@
 import esxpress, { Router } from "express";
 import { ProjectController } from "../controllers/ProjectController";
 import { TaskController } from "../controllers/TaskController";
-import { ProjectValidation, projectExists, userId, validateEmail, validateId, validateProjectId } from "../middleware/projects";
+import { ProjectValidation, projectExists, userId, validateContentNote, validateEmail, validateId, validateNoteId, validateProjectId } from "../middleware/projects";
 import { TaskValidation, hasAuthorization, taskBelongsToProject, taskExists, validateStatus, validateTaskId } from "../middleware/task";
 import { authenticate } from "../middleware/auth";
 import { TeamController } from "../controllers/TeamController";
+import { NoteController } from "../controllers/NoteController";
 
 const router = esxpress.Router();
 
@@ -81,6 +82,21 @@ router.get("/:projectId/team",
 router.delete("/:projectId/team/:userId",
     userId,
     TeamController.removeMember
+)
+
+/** routes for notes */
+router.post("/:projectId/tasks/:taskId/notes",
+    validateContentNote,
+    NoteController.createNote
+)
+
+router.get("/:projectId/tasks/:taskId/notes",
+    NoteController.getTaskNotes
+)
+
+router.delete("/:projectId/tasks/:taskId/notes/:noteId",
+    validateNoteId,
+    NoteController.deleteNote
 )
 
 export default router 

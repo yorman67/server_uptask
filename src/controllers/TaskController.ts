@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import Task from "../models/Task";
+import { populate } from "dotenv";
 
 
 export class TaskController {
@@ -32,9 +33,13 @@ export class TaskController {
 
     static gettaskById = async (req: Request, res: Response) => {
         try {
-            const task = await Task.findById(req.task.id).populate({
+            const task = await Task.findById(req.task.id)
+            .populate({
                 path: 'completedBy.user',
                 select: 'name email id'
+            })
+            .populate({
+                path: 'notes',populate: { path: 'createdBy', select: 'name email id' }
             })
             res.json({ tasks: task })
         } catch (error) {
