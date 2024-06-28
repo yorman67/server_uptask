@@ -1,6 +1,6 @@
 import esxpress, { Router } from "express";
 import { AuthController } from "../controllers/AuthController";
-import { accountValidation, emailValidation, loginValidation, authenticate, validateRecoverPassword, validateToken } from "../middleware/auth";
+import { accountValidation, emailValidation, loginValidation, authenticate, validateRecoverPassword, validateToken, valiateUpdateProfile, valiateUpdateProfilePassword } from "../middleware/auth";
 
 
 const router = esxpress.Router();
@@ -43,5 +43,19 @@ router.get("/get-user",
     authenticate,
     AuthController.user
 )
+
+/** Profile */
+router.put("/update-profile",
+    authenticate,
+    valiateUpdateProfile,
+    AuthController.updateProfile
+)
+
+router.post("/update-profile-password",
+    authenticate,
+    valiateUpdateProfilePassword,
+    AuthController.updateCurrentPassword
+)
+
 
 export default router

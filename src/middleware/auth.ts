@@ -133,3 +133,36 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
         })
     }
 }
+
+export const valiateUpdateProfile = async (req: Request, res: Response, next: NextFunction) => {
+    await check("name").not().isEmpty().run(req);
+    await check("email").not().isEmpty().isEmail().run(req);
+    let errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = new Error('Error updating profile')
+        return res.status(404).json({
+            error: error.message,
+            errors: errors
+        })
+    } next();
+}
+
+
+export const valiateUpdateProfilePassword = async (req: Request, res: Response, next: NextFunction) => {
+    await check("current_password").not().isEmpty().isLength({ min: 6 }).withMessage("current_password is required").run(req);
+    await check("password").not().isEmpty().isLength({ min: 6 }).withMessage("password is required").run(req);
+    await check("password_confirmation").custom((value, { req }) => {
+        if (value !== req.body.password) {
+            throw new Error("Las contraseñas no coinciden");
+        }
+        return true
+    }).run(req);
+    let errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = new Error('Error updating profile')
+        return res.status(404).json({
+            error: error.message,
+            errors: errors
+        })
+    } next();
+}
