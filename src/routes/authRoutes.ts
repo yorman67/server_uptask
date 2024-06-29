@@ -57,5 +57,10 @@ router.post("/update-profile-password",
     AuthController.updateCurrentPassword
 )
 
+router.post("/check-password",
+    authenticate,
+    AuthController.checkPassword
+)
+
 
 export default router

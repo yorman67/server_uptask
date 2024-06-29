@@ -22,6 +22,23 @@ const projectSchema = new Schema({ //mongoose
     team : [{type: Types.ObjectId, ref: "Auth"}]
 }, {timestamps: true});
 
+//midelware
+
+projectSchema.pre('deleteOne', { document: true }, async function() { // la funcion no puede ser arrow function 
+    const projectId = this._id
+    if(!projectId) return
+
+    const tasks = await mongoose.model('Task').find({project:projectId})
+    
+    console.log(tasks)
+
+    tasks.forEach(async task => {
+        await mongoose.model('Note').deleteMany({task:task._id})
+    })
+
+    await mongoose.model('Task').deleteMany({project:projectId})
+})
+
 const Project = mongoose.model<IProject>("Project", projectSchema);
 
 export default Project

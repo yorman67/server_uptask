@@ -17,7 +17,7 @@ connectDB()
 const app = express();
 
 //cors
-//app.use(corse(corsConfig))
+app.use(corse(corsConfig))
 
 //Logger
 app.use(morgan('dev'))

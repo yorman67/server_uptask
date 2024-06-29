@@ -46,5 +46,13 @@ export const TaskSchema = new Schema({
     }]
 }, { timestamps: true })
 
+// Midelware
+//https://mongoosejs.com/docs/middleware.html
+TaskSchema.pre('deleteOne',{document: true}, async function() { // la funcion no puede ser arrow function
+    const taskId = this._id
+    if(!taskId) return
+    await mongoose.model('Note').deleteMany({task:taskId})
+})
+
 const Task = mongoose.model<ITask>("Task", TaskSchema)
 export default Task
